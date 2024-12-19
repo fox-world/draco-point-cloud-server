@@ -6,3 +6,56 @@ body {
 a {
   color: #00B7FF;
 }
+
+.alert {
+  display: block;
+  position: relative;
+  word-wrap: break-word;
+  word-break: break-word;
+  padding: .75rem 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.alert > * {
+  max-width: 100%;
+}
+
+.alert + .alert {
+  margin-top: -.25rem;
+}
+
+.alert p {
+  margin-top: .5rem;
+  margin-bottom: .5rem;
+}
+
+.alert .title {
+  font-weight: 600;
+  margin: 0;
+}
+
+.alert > :first-child {
+  margin-top: 0;
+}
+
+.alert > :last-child {
+  margin-bottom: 0;
+}
+
+.alert.flat {
+  border: 1px solid transparent;
+  border-radius: .125rem;
+  color: #383d41;
+  background-color: #e2e3e5;
+  border-color: #d6d8db;
+}
+
+.alert.flat.tip {
+  color: #285b2a;
+  background-color: #dbefdc;
+  border-color: #cde9ce;
+}
+
+.alert.flat.tip .title {
+  color: #18381a;
+}
