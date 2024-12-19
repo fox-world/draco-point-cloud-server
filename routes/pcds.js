@@ -1,31 +1,56 @@
 var express = require('express');
 var router = express.Router();
 
-/* GET users listing. */
-router.get('/loadPcdBinary', function(req, res, next) {
-  res.send('respond with a resource');
-});
+router.get('/loadPcdBinary', loadPcdBinaryFile);
 
 module.exports = router;
 
+let fs = require('fs');
+let readline = require('readline');
+let protobufjs = require("protobufjs");
+let pcdJson = require("../proto/pcd_data.json")
+let pcdRoot = protobufjs.Root.fromJSON(pcdJson)
+let pcdMessage = pcdRoot.lookupType("PcdData");
 
-var fs = require('fs');
-var readline = require('readline');
-
-async function processPcdFile() {
-  const fileStream = fs.createReadStream('input.txt');
-
-  const rl = readline.createInterface({
+async function loadPcdBinaryFile(req, res, next) {
+  let fileStream = fs.createReadStream('pcds/000010.pcd');
+  let fileData = readline.createInterface({
     input: fileStream,
     crlfDelay: Infinity
   });
-  // Note: we use the crlfDelay option to recognize all instances of CR LF
-  // ('\r\n') in input.txt as a single line break.
 
-  for await (const line of rl) {
-    // Each line in input.txt will be successively available here as `line`.
-    console.log(`Line from file: ${line}`);
+
+  let points = [];
+  for await (const line of fileData) {
+    let data = processPcdData(line);
+    if (data == null) {
+      continue;
+    }
+    points.push(...data);
   }
+
+  let result = { idx: 1, name: '000010.pcd', point: points }
+  let buff = pcdMessage.encode(pcdMessage.create(result)).finish();
+  res.set('Content-Type', 'application/octet-stream');
+  res.send(buff);
 }
 
-processLineByLine();
+function processPcdData(line) {
+  let data = line.split(/\s/)
+  if (data.length != 4) {
+    return null;
+  }
+  for (let i = 0; i < 4; i++) {
+    if (!isNumeric(data[i])) {
+      return null;
+    }
+  }
+  return [Number(data[0]), Number(data[1]), Number(data[2])]
+}
+
+function isNumeric(str) {
+  if (typeof str != "string") {
+    return false;
+  }
+  return !isNaN(str) && !isNaN(parseFloat(str));
+}
