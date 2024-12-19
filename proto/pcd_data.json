@@ -1,0 +1,35 @@
+{
+  "options": {
+    "syntax": "proto3"
+  },
+  "nested": {
+    "PcdData": {
+      "oneofs": {
+        "_idx": {
+          "oneof": [
+            "idx"
+          ]
+        }
+      },
+      "fields": {
+        "idx": {
+          "type": "int32",
+          "id": 1,
+          "options": {
+            "proto3_optional": true
+          }
+        },
+        "name": {
+          "rule": "required",
+          "type": "string",
+          "id": 2
+        },
+        "point": {
+          "rule": "repeated",
+          "type": "float",
+          "id": 3
+        }
+      }
+    }
+  }
+}

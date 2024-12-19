@@ -12,5 +12,8 @@ set PORT=8000 && set DEBUG=draco-point-cloud-server:* && npm start
 
 # start with watch
 set PORT=8000 && nodemon ./bin/www
+
+# generate protobuf json schema file
+node ./node_modules/protobufjs-cli/bin/pbjs proto/pcd.proto -o proto/pcd_data.json
 ```
 
