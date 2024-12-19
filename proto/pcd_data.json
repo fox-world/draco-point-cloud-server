@@ -4,23 +4,12 @@
   },
   "nested": {
     "PcdData": {
-      "oneofs": {
-        "_idx": {
-          "oneof": [
-            "idx"
-          ]
-        }
-      },
       "fields": {
         "idx": {
           "type": "int32",
-          "id": 1,
-          "options": {
-            "proto3_optional": true
-          }
+          "id": 1
         },
         "name": {
-          "rule": "required",
           "type": "string",
           "id": 2
         },

@@ -22,7 +22,7 @@ let pcdRoot = protobufjs.Root.fromJSON(pcdJson)
 let pcdMessage = pcdRoot.lookupType("PcdData");
 
 async function loadPcdBinaryFile(req, res, next) {
-  let fileStream = fs.createReadStream('pcds/000010.pcd');
+  let fileStream = fs.createReadStream('pcds/000000.pcd');
   let fileData = readline.createInterface({
     input: fileStream,
     crlfDelay: Infinity
@@ -37,7 +37,7 @@ async function loadPcdBinaryFile(req, res, next) {
     points.push(...data);
   }
 
-  let result = { idx: 1, name: '000010.pcd', point: points }
+  let result = { idx: 1, name: '000000.pcd', point: points }
   let buff = pcdMessage.encode(pcdMessage.create(result)).finish();
   res.set('Content-Type', 'application/octet-stream');
   res.send(buff);
