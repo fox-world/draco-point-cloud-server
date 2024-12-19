@@ -1,11 +1,20 @@
 var express = require('express');
 var router = express.Router();
+let fs = require('fs');
 
+router.get('/listPcdFiles', listPcdFiles);
 router.get('/loadPcdBinary', loadPcdBinaryFile);
-
 module.exports = router;
 
-let fs = require('fs');
+async function listPcdFiles(req, res, next) {
+  let pcdFolder = 'pcds';
+  let data = [];
+  fs.readdirSync(pcdFolder).forEach(file => {
+    data.push(file);
+  });
+  res.send({ total: data.length, file: data });
+}
+
 let readline = require('readline');
 let protobufjs = require("protobufjs");
 let pcdJson = require("../proto/pcd_data.json")
@@ -18,7 +27,6 @@ async function loadPcdBinaryFile(req, res, next) {
     input: fileStream,
     crlfDelay: Infinity
   });
-
 
   let points = [];
   for await (const line of fileData) {
