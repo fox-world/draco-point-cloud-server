@@ -2,12 +2,13 @@ var express = require('express');
 var router = express.Router();
 let fs = require('fs');
 
+const pcdFolder = 'pcds_big';
+
 router.get('/listPcdFiles', listPcdFiles);
 router.get('/loadPcdBinary', loadPcdBinaryFile);
 module.exports = router;
 
 async function listPcdFiles(req, res, next) {
-  let pcdFolder = 'pcds';
   let data = [];
   fs.readdirSync(pcdFolder).forEach(file => {
     data.push(file);
@@ -23,7 +24,7 @@ let pcdMessage = pcdRoot.lookupType("PcdData");
 
 async function loadPcdBinaryFile(req, res, next) {
   let pcd = req.query.pcd;
-  let fileStream = fs.createReadStream(`pcds/${pcd}`);
+  let fileStream = fs.createReadStream(`${pcdFolder}/${pcd}`);
   let fileData = readline.createInterface({
     input: fileStream,
     crlfDelay: Infinity
