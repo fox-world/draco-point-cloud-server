@@ -1,12 +1,20 @@
-var express = require('express');
-var router = express.Router();
-let fs = require('fs');
+const express = require('express');
+const router = express.Router();
+const draco_tools = require('../tools/draco_tools.js')
+const fs = require('fs');
 
-const pcdFolder = 'pcds_big';
+const pcdFolder = 'pcds_small';
 
 router.get('/listPcdFiles', listPcdFiles);
 router.get('/loadPcdBinary', loadPcdBinaryFile);
+router.get('/convertDrcFiles', convertDrcFiles);
 module.exports = router;
+
+async function convertDrcFiles(req, res, next) {
+  draco_tools.convertDracoFiles(pcdFolder);
+  let timestamp = (new Date()).toISOString();
+  res.send("Draco文件转化成功:\t" + timestamp);
+}
 
 async function listPcdFiles(req, res, next) {
   let data = [];
