@@ -3,7 +3,7 @@ const router = express.Router();
 const draco_tools = require('../tools/draco_tools.js')
 const fs = require('fs');
 
-const pcdFolder = 'pcds_small';
+const pcdFolder = 'data/pcds_small';
 
 router.get('/listPcdFiles', listPcdFiles);
 router.get('/loadPcdBinary', loadPcdBinaryFile);

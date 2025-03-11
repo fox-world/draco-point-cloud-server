@@ -5,7 +5,8 @@ const log = require('simple-node-logger').createSimpleLogger();
 const pcd_tools = require('./pcd_tools.js')
 
 const convertDracoFiles = (srcFolder) => {
-    createDracoFolder(srcFolder);
+    let dracoFolder = createDracoFolder(srcFolder);
+    iterateFolder(srcFolder, dracoFolder);
 }
 
 const createDracoFolder = (srcFolder) => {
@@ -16,15 +17,15 @@ const createDracoFolder = (srcFolder) => {
     }
     fs.mkdirSync(dracoFolder);
     log.info('重新创建文件夹:\t' + dracoFolder);
-
-    iterateFolder(srcFolder, dracoFolder);
+    return dracoFolder;
 }
 
 const iterateFolder = (srcFolder, dstFolder) => {
     fs.readdirSync(srcFolder).forEach((file, index) => {
         log.info(file + ' 开始被处理');
         convertToPlyFile(srcFolder, dstFolder, file);
-    })
+    });
+    log.info('--------------全部处理完毕-----------------');
 }
 
 const convertToPlyFile = async (srcFolder, dstFolder, file) => {
