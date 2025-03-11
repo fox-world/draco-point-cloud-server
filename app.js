@@ -5,7 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
-var pcdsRouter = require('./routes/pcds');
+var pcdsRouter = require('./routes/main');
 var cors = require('cors')
 
 var app = express();
@@ -22,7 +22,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors({credentials: true, origin: true}));
 
 app.use('/', indexRouter);
-app.use('/pcds', pcdsRouter);
+app.use('/main', pcdsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
