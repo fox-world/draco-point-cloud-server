@@ -1,4 +1,17 @@
-const convertPcdToPointData = (line) => {
+const convertPcdToPlyData = (line) => {
+    let data = line.split(/\s/)
+    if (data.length != 4) {
+        return null;
+    }
+    for (let i = 0; i < 4; i++) {
+        if (!isNumeric(data[i])) {
+            return null;
+        }
+    }
+    return data[0] + ' ' + data[1] + ' ' + data[2];
+}
+
+const convertPcdToPointCloudData = (line) => {
     let data = line.split(/\s/)
     if (data.length != 4) {
         return null;
@@ -19,5 +32,5 @@ const isNumeric = (str) => {
 }
 
 module.exports = {
-    isNumeric, convertPcdToPointData
+    isNumeric, convertPcdToPointCloudData, convertPcdToPlyData
 }

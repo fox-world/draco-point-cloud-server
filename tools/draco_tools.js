@@ -49,7 +49,7 @@ const convertToDrcFile = async (srcFolder, dstFolder, file, encoderModule, encod
 
     let points = [];
     for await (const line of fileData) {
-        let point = pcd_tools.convertPcdToPointData(line);
+        let point = pcd_tools.convertPcdToPointCloudData(line);
         if (!!point) {
             points = points.concat(point);
         }

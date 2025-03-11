@@ -60,10 +60,13 @@ a {
   color: #18381a;
 }
 
-.link{
-  margin-left: -40px;
+table.link {
+  width: 50%;
+  border-collapse: collapse;
 }
-.link > li{
-  display: inline-block;
-  padding-right: 20px;
+
+table.link > thead > tr > th,
+table.link > tbody > tr > td {
+  border: 1px solid #d0d0d0;
+  padding:0.5em 3em;
 }

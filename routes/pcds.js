@@ -1,15 +1,34 @@
 const express = require('express');
 const router = express.Router();
-const draco_tools = require('../tools/draco_tools.js')
 const moment = require('moment-timezone');
 const fs = require('fs');
 
+const pcd_tools = require('../tools/pcd_tools.js')
+const ply_tools = require('../tools/ply_tools.js');
+const draco_tools = require('../tools/draco_tools.js');
+
 const pcdFolder = 'data/pcds_small';
+const plyFolder = pcdFolder + '_ply';
 
 router.get('/listPcdFiles', listPcdFiles);
+router.get('/listPlyFiles', listPlyFiles);
+
+router.get('/loadPcdText', loadPcdTextFile);
 router.get('/loadPcdBinary', loadPcdBinaryFile);
+router.get('/loadPly', loadPlyFile);
+
+router.get('/convertPlyFiles', convertPlyFiles);
 router.get('/convertDrcFiles', convertDrcFiles);
+
 module.exports = router;
+
+//=================文件转化相关======================
+async function convertPlyFiles(req, res, next) {
+  ply_tools.convertPlyFiles(pcdFolder);
+  let timeZone = moment.tz.guess();
+  let formattedTime = moment().tz(timeZone).format('YYYY-MM-DD HH:mm:ss.SSS');
+  res.send("Ply文件转化成功:\t" + formattedTime);
+}
 
 async function convertDrcFiles(req, res, next) {
   draco_tools.convertDracoFiles(pcdFolder);
@@ -18,6 +37,7 @@ async function convertDrcFiles(req, res, next) {
   res.send("Draco文件转化成功:\t" + formattedTime);
 }
 
+//=================文件列表相关======================
 async function listPcdFiles(req, res, next) {
   let data = [];
   fs.readdirSync(pcdFolder).forEach(file => {
@@ -26,13 +46,41 @@ async function listPcdFiles(req, res, next) {
   res.send({ total: data.length, file: data });
 }
 
-let readline = require('readline');
-let protobufjs = require("protobufjs");
-let pcdJson = require("../proto/pcd_data.json")
-let pcdRoot = protobufjs.Root.fromJSON(pcdJson)
-let pcdMessage = pcdRoot.lookupType("PcdData");
+async function listPlyFiles(req, res, next) {
+  let data = [];
+  fs.readdirSync(plyFolder).forEach(file => {
+    data.push(file);
+  });
+  res.send({ total: data.length, file: data });
+}
+
+//=================文件加载相关======================
+async function loadPlyFile(req, res, next) {
+  let pcd = req.query.pcd;
+
+  res.setHeader('Content-Disposition', `attachment; filename="${pcd}"`);
+  res.setHeader('Content-Type', 'text/plain');
+
+  let fileStream = fs.createReadStream(`${plyFolder}/${pcd}`);
+  fileStream.pipe(res);
+}
+
+async function loadPcdTextFile(req, res, next) {
+  let pcd = req.query.pcd;
+
+  res.setHeader('Content-Disposition', `attachment; filename="${pcd}"`);
+  res.setHeader('Content-Type', 'text/plain');
+
+  let fileStream = fs.createReadStream(`${pcdFolder}/${pcd}`);
+  fileStream.pipe(res);
+}
 
 async function loadPcdBinaryFile(req, res, next) {
+  let readline = require('readline');
+  let protobufjs = require("protobufjs");
+  let pcdJson = require("../proto/pcd_data.json")
+  let pcdRoot = protobufjs.Root.fromJSON(pcdJson)
+  let pcdMessage = pcdRoot.lookupType("PcdData");
   let pcd = req.query.pcd;
   let fileStream = fs.createReadStream(`${pcdFolder}/${pcd}`);
   let fileData = readline.createInterface({
@@ -42,7 +90,7 @@ async function loadPcdBinaryFile(req, res, next) {
 
   let points = [];
   for await (const line of fileData) {
-    let data = processPcdData(line);
+    let data = pcd_tools.convertPcdToPointCloudData(line);
     if (data == null) {
       continue;
     }
@@ -51,26 +99,7 @@ async function loadPcdBinaryFile(req, res, next) {
 
   let result = { idx: 1, name: pcd, point: points }
   let buff = pcdMessage.encode(pcdMessage.create(result)).finish();
+  res.setHeader('Content-Disposition', `attachment; filename="${pcd}"`);
   res.set('Content-Type', 'application/octet-stream');
   res.send(buff);
-}
-
-function processPcdData(line) {
-  let data = line.split(/\s/)
-  if (data.length != 4) {
-    return null;
-  }
-  for (let i = 0; i < 4; i++) {
-    if (!isNumeric(data[i])) {
-      return null;
-    }
-  }
-  return [Number(data[0]), Number(data[1]), Number(data[2])]
-}
-
-function isNumeric(str) {
-  if (typeof str != "string") {
-    return false;
-  }
-  return !isNaN(str) && !isNaN(parseFloat(str));
 }

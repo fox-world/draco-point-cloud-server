@@ -5,14 +5,35 @@ block content
     p(class='title') 说明
     p #{description}
 
-  ul(class='link') 
-     li 
-        a(href='pcds/listPcdFiles',target='_blank') 点云文件列表[Pcd]
-     li 
-        a(href='pcds/convertDrcFiles',target='_blank') Pcd转化为Drc文件
-     li 
-        a(href='pcds/listDrcFiles',target='_blank') Drc文件列表[Draco]     
-     li 
-        a(href='pcds/loadPcdBinary?pcd=000010.pcd',target='_blank') 点云加载[文本]
-     li 
-        a(href='pcds/loadDrcBinary?pcd=000010.drc',target='_blank') 点云加载[Draco]   
+  table(class='link')
+     thead
+         tr 
+            th 原始点云
+            th Ply文件
+            th Drc文件  
+     tbody
+         tr
+            td 
+              a(href='pcds/listPcdFiles',target='_blank') 点云文件列表[Pcd]
+            td 
+              a(href='pcds/listPlyFiles',target='_blank') 点云文件列表[Ply]
+            td 
+              a(href='pcds/listDrcFiles',target='_blank') Drc文件列表[Draco]     
+
+         tr
+            td 
+              a(href='pcds/loadPcdText?pcd=000010.pcd',target='_blank') 点云文件获取[文本]
+            td 
+              a(href='pcds/convertPlyFiles',target='_blank') Pcd转化为Ply文件
+            td
+              a(href='pcds/convertDrcFiles',target='_blank') Pcd转化为Drc文件
+
+         tr 
+            td
+              a(href='pcds/loadPcdBinary?pcd=000010.pcd',target='_blank') 点云文件获取[二进制]
+            td
+               a(href='pcds/loadPly?pcd=000010.ply',target='_blank') 点云文件获取[Ply] 
+            td
+               a(href='pcds/loadDrc?pcd=000010.drc',target='_blank') 点云文件获取[Drc]    
+                    
+                        
