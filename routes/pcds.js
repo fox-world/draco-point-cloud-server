@@ -7,11 +7,13 @@ const pcd_tools = require('../tools/pcd_tools.js')
 const ply_tools = require('../tools/ply_tools.js');
 const draco_tools = require('../tools/draco_tools.js');
 
-const pcdFolder = 'data/pcds_small';
+const pcdFolder = 'data/pcds_big';
 const plyFolder = pcdFolder + '_ply';
+const drcFolder = pcdFolder + '_drc';
 
 router.get('/listPcdFiles', listPcdFiles);
 router.get('/listPlyFiles', listPlyFiles);
+router.get('/listDrcFiles', listDrcFiles);
 
 router.get('/loadPcdText', loadPcdTextFile);
 router.get('/loadPcdBinary', loadPcdBinaryFile);
@@ -49,6 +51,14 @@ async function listPcdFiles(req, res, next) {
 async function listPlyFiles(req, res, next) {
   let data = [];
   fs.readdirSync(plyFolder).forEach(file => {
+    data.push(file);
+  });
+  res.send({ total: data.length, file: data });
+}
+
+async function listDrcFiles(req, res, next) {
+  let data = [];
+  fs.readdirSync(drcFolder).forEach(file => {
     data.push(file);
   });
   res.send({ total: data.length, file: data });
