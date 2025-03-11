@@ -34,7 +34,7 @@ async function convertDrcFiles(req, res, next) {
   draco_tools.convertDracoFiles(pcdFolder);
   let timeZone = moment.tz.guess();
   let formattedTime = moment().tz(timeZone).format('YYYY-MM-DD HH:mm:ss.SSS');
-  res.send("Draco文件转化成功:\t" + formattedTime);
+  res.send("Draco文件转化处理中:\t" + formattedTime);
 }
 
 //=================文件列表相关======================
