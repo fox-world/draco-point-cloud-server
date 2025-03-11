@@ -19,6 +19,9 @@ router.get('/loadPcdText', loadPcdTextFile);
 router.get('/loadPcdBinary', loadPcdBinaryFile);
 router.get('/loadPly', loadPlyFile);
 
+router.get('/loadDrc', loadDrcFile);
+router.get('/loadDrcBinary', loadDrcBinaryFile);
+
 router.get('/convertPlyFiles', convertPlyFiles);
 router.get('/convertDrcFiles', convertDrcFiles);
 
@@ -65,13 +68,39 @@ async function listDrcFiles(req, res, next) {
 }
 
 //=================文件加载相关======================
-async function loadPlyFile(req, res, next) {
-  let pcd = req.query.pcd;
+async function loadDrcFile(req, res, next) {
+  let drc = req.query.drc;
 
-  res.setHeader('Content-Disposition', `attachment; filename="${pcd}"`);
+  res.setHeader('Content-Disposition', `attachment; filename="${drc}"`);
   res.setHeader('Content-Type', 'text/plain');
 
-  let fileStream = fs.createReadStream(`${plyFolder}/${pcd}`);
+  let fileStream = fs.createReadStream(`${drcFolder}/${drc}`);
+  fileStream.pipe(res);
+}
+
+async function loadDrcBinaryFile(req, res, next) {
+  let protobufjs = require("protobufjs");
+  let pointJson = require("../proto/point_data.json")
+  let pointRoot = protobufjs.Root.fromJSON(pointJson)
+  let pointMessage = pointRoot.lookupType("PointData");
+  let drc = req.query.drc;
+  let buffers = fs.readFileSync(`${drcFolder}/${drc}`);
+  let bytes = new Uint8Array(buffers);
+
+  let result = { idx: 1, name: drc, points: bytes }
+  let buff = pointMessage.encode(pointMessage.create(result)).finish();
+  res.setHeader('Content-Disposition', `attachment; filename="${drc}"`);
+  res.set('Content-Type', 'application/octet-stream');
+  res.send(buff);
+}
+
+async function loadPlyFile(req, res, next) {
+  let ply = req.query.ply;
+
+  res.setHeader('Content-Disposition', `attachment; filename="${ply}"`);
+  res.setHeader('Content-Type', 'text/plain');
+
+  let fileStream = fs.createReadStream(`${plyFolder}/${ply}`);
   fileStream.pipe(res);
 }
 

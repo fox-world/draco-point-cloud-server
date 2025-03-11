@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+message PointData{
+  int32 idx=1;
+  string name=2;
+  bytes points=3;
+}

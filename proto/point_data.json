@@ -1,0 +1,23 @@
+{
+  "options": {
+    "syntax": "proto3"
+  },
+  "nested": {
+    "PointData": {
+      "fields": {
+        "idx": {
+          "type": "int32",
+          "id": 1
+        },
+        "name": {
+          "type": "string",
+          "id": 2
+        },
+        "points": {
+          "type": "bytes",
+          "id": 3
+        }
+      }
+    }
+  }
+}
