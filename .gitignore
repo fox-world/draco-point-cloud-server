@@ -11,8 +11,9 @@
 # production
 /build
 
-/data/*_drc
 /data/*_big
+/data/*_drc
+/data/*_ply
 
 # misc
 .DS_Store
