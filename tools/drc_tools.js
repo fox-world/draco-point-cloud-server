@@ -3,10 +3,9 @@ const path = require("path");
 const readline = require('readline');
 const log = require('simple-node-logger').createSimpleLogger();
 const pcd_tools = require('./pcd_tools.js');
-const pLimit = require('p-limit').default; // 引入 p-limit
+const pLimit = require('p-limit').default;
 
 const { styleText } = require('node:util');
-
 const draco3d = require('draco3d');
 
 const convertDracoFiles = (srcFolder) => {

@@ -3,6 +3,9 @@ const path = require("path");
 const readline = require('readline');
 const log = require('simple-node-logger').createSimpleLogger();
 const pcd_tools = require('./pcd_tools.js')
+const pLimit = require('p-limit').default;
+
+const { styleText } = require('node:util');
 
 const convertPlyFiles = (srcFolder) => {
     let plyFolder = createPlyFolder(srcFolder);
@@ -21,13 +24,21 @@ const createPlyFolder = (srcFolder) => {
 }
 
 const iterateFolder = async (srcFolder, dstFolder) => {
+    let limit = pLimit(5); // 限制并发数
+    let startTime = new Date();
+
     const files = fs.readdirSync(srcFolder);
-    const promises = files.map(file => {
-        log.info(file + ' 开始被解析');
-        return convertToPlyFile(srcFolder, dstFolder, file);
+    let promises = files.map((file) => {
+        return limit(() => {
+            log.info(file + ' 开始被解析');
+            return convertToPlyFile(srcFolder, dstFolder, file);
+        });
     });
-    await Promise.all(promises);
-    log.info('--------------pcd转为ply全部处理完毕-----------------');
+    await Promise.all(promises).then(() => {
+        let endTime = new Date();
+        let elapsedTime = (endTime - startTime) / 1000;
+        log.info(styleText('green', `--------------pcd转为ply全部处理完毕,总耗时:${elapsedTime}s`));
+    });
 }
 
 const convertToPlyFile = async (srcFolder, dstFolder, file) => {
@@ -63,7 +74,7 @@ const convertToPlyFile = async (srcFolder, dstFolder, file) => {
     let plyContent = plyData.join('\n') + '\n';
 
     fs.writeFileSync(plyPath, plyContent, { flag: 'w' });
-    log.info(plyFile + ' 生成完毕');
+    log.info(styleText('yellow', `${plyFile} 成功创建并保存!`));
 }
 
 module.exports = {
