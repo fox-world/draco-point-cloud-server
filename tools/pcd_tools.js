@@ -1,4 +1,4 @@
-const convertPcdToPlyData = (line) => {
+const convertPcdToPointData = (line) => {
     let data = line.split(/\s/)
     if (data.length != 4) {
         return null;
@@ -19,5 +19,5 @@ const isNumeric = (str) => {
 }
 
 module.exports = {
-    isNumeric, convertPcdToPlyData
+    isNumeric, convertPcdToPointData
 }

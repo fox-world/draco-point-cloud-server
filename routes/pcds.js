@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const draco_tools = require('../tools/draco_tools.js')
+const moment = require('moment-timezone');
 const fs = require('fs');
 
 const pcdFolder = 'data/pcds_small';
@@ -12,8 +13,9 @@ module.exports = router;
 
 async function convertDrcFiles(req, res, next) {
   draco_tools.convertDracoFiles(pcdFolder);
-  let timestamp = (new Date()).toISOString();
-  res.send("Draco文件转化成功:\t" + timestamp);
+  let timeZone = moment.tz.guess();
+  let formattedTime = moment().tz(timeZone).format('YYYY-MM-DD HH:mm:ss.SSS');
+  res.send("Draco文件转化成功:\t" + formattedTime);
 }
 
 async function listPcdFiles(req, res, next) {
