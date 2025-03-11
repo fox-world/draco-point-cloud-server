@@ -8,7 +8,7 @@ const convertPcdToPlyData = (line) => {
             return null;
         }
     }
-    return data[0] + " " + data[1] + " " + data[2];
+    return [Number(data[0]), Number(data[1]), Number(data[2])];
 }
 
 const isNumeric = (str) => {

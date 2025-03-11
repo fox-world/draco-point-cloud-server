@@ -4,13 +4,15 @@ const readline = require('readline');
 const log = require('simple-node-logger').createSimpleLogger();
 const pcd_tools = require('./pcd_tools.js')
 
+const draco3d = require('draco3d');
+
 const convertDracoFiles = (srcFolder) => {
     let plyFolder = createPlyFolder(srcFolder);
     iterateFolder(srcFolder, plyFolder);
 }
 
 const createPlyFolder = (srcFolder) => {
-    let plyFolder = srcFolder + '_ply';
+    let plyFolder = srcFolder + '_drc';
     if (fs.existsSync(plyFolder)) {
         fs.rmSync(plyFolder, { recursive: true });
         log.info('删除文件夹: ' + plyFolder);
@@ -22,15 +24,15 @@ const createPlyFolder = (srcFolder) => {
 
 const iterateFolder = async (srcFolder, dstFolder) => {
     const files = fs.readdirSync(srcFolder);
-    const promises = files.map(file => {
+    const promises = files.slice(0, 1).map((file) => {
         log.info(file + ' 开始被解析');
-        return convertToPlyFile(srcFolder, dstFolder, file);
+        return convertToDrcFile(srcFolder, dstFolder, file);
     });
     await Promise.all(promises);
     log.info('--------------pcd转为ply全部处理完毕-----------------');
 }
 
-const convertToPlyFile = async (srcFolder, dstFolder, file) => {
+const convertToDrcFile = async (srcFolder, dstFolder, file) => {
     let fileStream = fs.createReadStream(srcFolder + '/' + file);
     let fileData = readline.createInterface({
         input: fileStream,
@@ -41,29 +43,70 @@ const convertToPlyFile = async (srcFolder, dstFolder, file) => {
     for await (const line of fileData) {
         let point = pcd_tools.convertPcdToPlyData(line);
         if (!!point) {
-            points.push(point);
+            points = points.concat(point);
         }
     }
     let pointSize = points.length;
-    let headers = [
-        'ply',
-        'format ascii 1.0',
-        'element vertex ' + pointSize,
-        'property float x',
-        'property float y',
-        'property float z',
-        'end_header'
-    ];
-    let plyData = [...headers, ...points];
 
-    // 没有扩展名的文件名称
-    let fileName = path.parse(file).name;
-    let plyFile = fileName + '.ply';
-    let plyPath = path.join(dstFolder, plyFile);
-    let plyContent = plyData.join('\n') + '\n';
+    let encoderModule = null, encoder = null;
+    draco3d.createEncoderModule({}).then(function (module) {
+        encoderModule = module;
+        log.info('Encoder Module Initialized!');
 
-    fs.writeFileSync(plyPath, plyContent, { flag: 'w' });
-    log.info(plyFile + ' 生成完毕');
+        encoder = new encoderModule.Encoder();
+        const pointCloudBuilder = new encoderModule.PointCloudBuilder();
+        const newPointCloud = new encoderModule.PointCloud();
+
+        const attrs = { POSITION: 3 };
+        Object.keys(attrs).forEach((attr) => {
+            const stride = attrs[attr];
+            const numValues = pointSize;
+            const numPoints = numValues / stride;
+            const encoderAttr = encoderModule[attr];
+
+            const attributeDataArray = new Float32Array(numValues);
+            for (let i = 0; i < numValues; ++i) {
+                attributeDataArray[i] = points[i];
+            }
+            pointCloudBuilder.AddFloatAttribute(newPointCloud, encoderAttr, numPoints, stride, attributeDataArray);
+        });
+
+        let encodedData = new encoderModule.DracoInt8Array();
+        encoder.SetSpeedOptions(5, 5);
+        encoder.SetAttributeQuantization(encoderModule.POSITION, 10);
+        encoder.SetEncodingMethod(encoderModule.MESH_EDGEBREAKER_ENCODING);
+
+        log.info(`${file} begin to encoding...`);
+        let encodedLen = encoder.EncodePointCloudToDracoBuffer(newPointCloud, false, encodedData);
+        encoderModule.destroy(newPointCloud);
+
+        if (encodedLen > 0) {
+            log.info(`${file} encoding length: ` + encodedLen);
+        } else {
+            log.error(`${file} encoding failed `);
+        }
+
+        let fileName = path.parse(file).name;
+        let drcFile = fileName + '.drc';
+        let drcPath = path.join(dstFolder, drcFile);
+
+        let outputBuffer = new ArrayBuffer(encodedLen);
+        let outputData = new Int8Array(outputBuffer);
+        for (let i = 0; i < encodedLen; ++i) {
+            outputData[i] = encodedData.GetValue(i);
+        }
+
+        fs.writeFile(drcPath, Buffer.from(outputBuffer), 'binary',
+            function (err) {
+                if (err) {
+                    log.info(err);
+                } else {
+                    log.info(`${drcFile} was create and saved success!`);
+                }
+            });
+
+        encoderModule.destroy(encoder);
+    });
 }
 
 module.exports = {
