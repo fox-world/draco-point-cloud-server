@@ -1,3 +1,5 @@
+const pcdFolder = 'data/pcds_big';
+
 const convertPcdToPlyData = (line) => {
     let data = line.split(/\s/)
     if (data.length != 4) {
@@ -32,5 +34,5 @@ const isNumeric = (str) => {
 }
 
 module.exports = {
-    isNumeric, convertPcdToPointCloudData, convertPcdToPlyData
+    pcdFolder, isNumeric, convertPcdToPointCloudData, convertPcdToPlyData
 }

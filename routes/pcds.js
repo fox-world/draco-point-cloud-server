@@ -1,144 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const moment = require('moment-timezone');
-const fs = require('fs');
 
-const pcd_tools = require('../tools/pcd_tools.js')
-const ply_tools = require('../tools/ply_tools.js');
-const draco_tools = require('../tools/draco_tools.js');
+const pcd_func = require('../func/pcd_func.js');
+const ply_func = require('../func/ply_func.js');
+const drc_func = require('../func/drc_func.js');
 
-const pcdFolder = 'data/pcds_big';
-const plyFolder = pcdFolder + '_ply';
-const drcFolder = pcdFolder + '_drc';
+router.get('/listPcdFiles', pcd_func.listPcdFiles);
+router.get('/loadPcdText', pcd_func.loadPcdTextFile);
+router.get('/loadPcdBinary', pcd_func.loadPcdBinaryFile);
 
-router.get('/listPcdFiles', listPcdFiles);
-router.get('/listPlyFiles', listPlyFiles);
-router.get('/listDrcFiles', listDrcFiles);
+router.get('/convertPlyFiles', ply_func.convertPlyFiles);
+router.get('/listPlyFiles', ply_func.listPlyFiles);
+router.get('/loadPly', ply_func.loadPlyFile);
 
-router.get('/loadPcdText', loadPcdTextFile);
-router.get('/loadPcdBinary', loadPcdBinaryFile);
-router.get('/loadPly', loadPlyFile);
-
-router.get('/loadDrc', loadDrcFile);
-router.get('/loadDrcBinary', loadDrcBinaryFile);
-
-router.get('/convertPlyFiles', convertPlyFiles);
-router.get('/convertDrcFiles', convertDrcFiles);
+router.get('/convertDrcFiles', drc_func.convertDrcFiles);
+router.get('/listDrcFiles', drc_func.listDrcFiles);
+router.get('/loadDrc', drc_func.loadDrcFile);
+router.get('/loadDrcBinary', drc_func.loadDrcBinaryFile);
 
 module.exports = router;
-
-//=================文件转化相关======================
-async function convertPlyFiles(req, res, next) {
-  ply_tools.convertPlyFiles(pcdFolder);
-  let timeZone = moment.tz.guess();
-  let formattedTime = moment().tz(timeZone).format('YYYY-MM-DD HH:mm:ss.SSS');
-  res.send("Ply文件转化成功:\t" + formattedTime);
-}
-
-async function convertDrcFiles(req, res, next) {
-  draco_tools.convertDracoFiles(pcdFolder);
-  let timeZone = moment.tz.guess();
-  let formattedTime = moment().tz(timeZone).format('YYYY-MM-DD HH:mm:ss.SSS');
-  res.send("Draco文件转化处理中:\t" + formattedTime);
-}
-
-//=================文件列表相关======================
-async function listPcdFiles(req, res, next) {
-  let data = [];
-  fs.readdirSync(pcdFolder).forEach(file => {
-    data.push(file);
-  });
-  res.send({ total: data.length, file: data });
-}
-
-async function listPlyFiles(req, res, next) {
-  let data = [];
-  fs.readdirSync(plyFolder).forEach(file => {
-    data.push(file);
-  });
-  res.send({ total: data.length, file: data });
-}
-
-async function listDrcFiles(req, res, next) {
-  let data = [];
-  fs.readdirSync(drcFolder).forEach(file => {
-    data.push(file);
-  });
-  res.send({ total: data.length, file: data });
-}
-
-//=================文件加载相关======================
-async function loadDrcFile(req, res, next) {
-  let drc = req.query.drc;
-
-  res.setHeader('Content-Disposition', `attachment; filename="${drc}"`);
-  res.setHeader('Content-Type', 'text/plain');
-
-  let fileStream = fs.createReadStream(`${drcFolder}/${drc}`);
-  fileStream.pipe(res);
-}
-
-async function loadDrcBinaryFile(req, res, next) {
-  let protobufjs = require("protobufjs");
-  let pointJson = require("../proto/point_data.json")
-  let pointRoot = protobufjs.Root.fromJSON(pointJson)
-  let pointMessage = pointRoot.lookupType("PointData");
-  let drc = req.query.drc;
-  let buffers = fs.readFileSync(`${drcFolder}/${drc}`);
-  let bytes = new Uint8Array(buffers);
-
-  let result = { idx: 1, name: drc, points: bytes }
-  let buff = pointMessage.encode(pointMessage.create(result)).finish();
-  res.setHeader('Content-Disposition', `attachment; filename="${drc}"`);
-  res.set('Content-Type', 'application/octet-stream');
-  res.send(buff);
-}
-
-async function loadPlyFile(req, res, next) {
-  let ply = req.query.ply;
-
-  res.setHeader('Content-Disposition', `attachment; filename="${ply}"`);
-  res.setHeader('Content-Type', 'text/plain');
-
-  let fileStream = fs.createReadStream(`${plyFolder}/${ply}`);
-  fileStream.pipe(res);
-}
-
-async function loadPcdTextFile(req, res, next) {
-  let pcd = req.query.pcd;
-
-  res.setHeader('Content-Disposition', `attachment; filename="${pcd}"`);
-  res.setHeader('Content-Type', 'text/plain');
-
-  let fileStream = fs.createReadStream(`${pcdFolder}/${pcd}`);
-  fileStream.pipe(res);
-}
-
-async function loadPcdBinaryFile(req, res, next) {
-  let readline = require('readline');
-  let protobufjs = require("protobufjs");
-  let pcdJson = require("../proto/pcd_data.json")
-  let pcdRoot = protobufjs.Root.fromJSON(pcdJson)
-  let pcdMessage = pcdRoot.lookupType("PcdData");
-  let pcd = req.query.pcd;
-  let fileStream = fs.createReadStream(`${pcdFolder}/${pcd}`);
-  let fileData = readline.createInterface({
-    input: fileStream,
-    crlfDelay: Infinity
-  });
-
-  let points = [];
-  for await (const line of fileData) {
-    let data = pcd_tools.convertPcdToPointCloudData(line);
-    if (data == null) {
-      continue;
-    }
-    points.push(...data);
-  }
-
-  let result = { idx: 1, name: pcd, point: points }
-  let buff = pcdMessage.encode(pcdMessage.create(result)).finish();
-  res.setHeader('Content-Disposition', `attachment; filename="${pcd}"`);
-  res.set('Content-Type', 'application/octet-stream');
-  res.send(buff);
-}
