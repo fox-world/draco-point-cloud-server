@@ -34,13 +34,16 @@ docker stop draco_server && docker rm draco_server
 
 # API
 
-| Interface                 | Description                                    |
-| ------------------------- | ---------------------------------------------- |
-| `listPcdFiles`            | List all `pcd` files with `json` format        |
-| `loadPcdText?pcd=xxx.pcd` | download specify `pcd` file with `text` format |
-|                           |                                                |
-|                           |                                                |
-|                           |                                                |
-|                           |                                                |
-|                           |                                                |
+| Interface                        | Description                                                  |
+| -------------------------------- | ------------------------------------------------------------ |
+| `main/listPcdFiles`              | List all `pcd` files with `json` format                      |
+| `main/loadPcdText?pcd=xxx.pcd`   | Download specify `pcd` file with `text` format               |
+| `main/loadPcdBinary?pcd=xxx.pcd` | Download specify `pcd` file with `binary` format via `Protocol Buffers` |
+| `main/convertPlyFiles`           | Convert `pcd` files to `ply` format inside specified folder  |
+| `main/listPlyFiles`              | List all `ply` files with `json` format                      |
+| `main/loadPly?ply=xxx.ply`       | Download specify `ply` file with `text` format               |
+| `main/convertDrcFiles`           | Convert `ply` files to `drc` format inside specified folder  |
+| `main/listDrcFiles`              | List all `drc` files with `json` format                      |
+| `main/loadDrc?drc=xxx.drc`       | Download specify `drc` file with `binary` format directly    |
+| `main/loadDrcBinary?drc=xxx.drc` | Download specify `drc` file with `binary` format via `Protocol Buffers` |
 
