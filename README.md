@@ -32,3 +32,15 @@ docker run -d -p 8000:8000 --name draco_server lucumt_draco_client:1.0
 docker stop draco_server && docker rm draco_server
 ```
 
+# API
+
+| Interface      | Description |
+| -------------- | ----------- |
+| `listPcdFiles` |             |
+| `loadPcdText`  |             |
+|                |             |
+|                |             |
+|                |             |
+|                |             |
+|                |             |
+
