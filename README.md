@@ -34,13 +34,13 @@ docker stop draco_server && docker rm draco_server
 
 # API
 
-| Interface      | Description |
-| -------------- | ----------- |
-| `listPcdFiles` |             |
-| `loadPcdText`  |             |
-|                |             |
-|                |             |
-|                |             |
-|                |             |
-|                |             |
+| Interface                 | Description                                    |
+| ------------------------- | ---------------------------------------------- |
+| `listPcdFiles`            | List all `pcd` files with `json` format        |
+| `loadPcdText?pcd=xxx.pcd` | download specify `pcd` file with `text` format |
+|                           |                                                |
+|                           |                                                |
+|                           |                                                |
+|                           |                                                |
+|                           |                                                |
 
