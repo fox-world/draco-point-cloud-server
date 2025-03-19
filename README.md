@@ -23,10 +23,10 @@ node ./node_modules/protobufjs-cli/bin/pbjs proto/pcd.proto -o proto/pcd_data.js
 
 ```bash
 # build image
-docker build -t lucumt_draco_client:1.0 .
+docker build -t lucumt_draco_server:1.0 .
 
 # run docker
-docker run -d -p 8000:8000 --name draco_server lucumt_draco_client:1.0
+docker run -d -p 8000:8000 --name draco_server lucumt_draco_server:1.0
 
 # stop docker
 docker stop draco_server && docker rm draco_server
